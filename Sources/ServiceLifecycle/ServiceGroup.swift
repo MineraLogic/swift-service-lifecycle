@@ -247,7 +247,7 @@ public actor ServiceGroup: Sendable, Service {
         gracefulShutdownStream: AsyncStream<Void>,
         addedServiceChannel: AsyncChannel<ServiceGroupConfiguration.ServiceConfiguration>
     ) async throws {
-        self.logger.debug(
+        self.logger.log(level: loggingConfiguration.eventLevels.onRun,
             "Starting service lifecycle",
             metadata: [
                 self.loggingConfiguration.keys.gracefulShutdownSignalsKey: "\(self.gracefulShutdownSignals)",
@@ -394,7 +394,8 @@ public actor ServiceGroup: Sendable, Service {
 
                     switch service.successTerminationBehavior.behavior {
                     case .cancelGroup:
-                        self.logger.debug(
+                        self.logger.log(
+                            level: self.loggingConfiguration.eventLevels.onServiceTermination,
                             "Service finished unexpectedly. Cancelling group.",
                             metadata: [
                                 self.loggingConfiguration.keys.serviceKey: "\(service.service)"
@@ -450,7 +451,8 @@ public actor ServiceGroup: Sendable, Service {
                 case .serviceThrew(let service, let index, let serviceError):
                     switch service.failureTerminationBehavior.behavior {
                     case .cancelGroup:
-                        self.logger.debug(
+                        self.logger.log(
+                            level: self.loggingConfiguration.eventLevels.onServiceTermination,
                             "Service threw error. Cancelling group.",
                             metadata: [
                                 self.loggingConfiguration.keys.serviceKey: "\(service.service)",
@@ -511,7 +513,8 @@ public actor ServiceGroup: Sendable, Service {
                 case .signalCaught(let unixSignal):
                     if self.gracefulShutdownSignals.contains(unixSignal) {
                         // Let's initiate graceful shutdown.
-                        self.logger.debug(
+                        self.logger.log(
+                            level: self.loggingConfiguration.eventLevels.onSignal,
                             "Signal caught. Shutting down the group.",
                             metadata: [
                                 self.loggingConfiguration.keys.signalKey: "\(unixSignal)"
@@ -530,7 +533,8 @@ public actor ServiceGroup: Sendable, Service {
                         }
                     } else {
                         // Let's cancel the group.
-                        self.logger.debug(
+                        self.logger.log(
+                            level: self.loggingConfiguration.eventLevels.onSignal,
                             "Signal caught. Cancelling the group.",
                             metadata: [
                                 self.loggingConfiguration.keys.signalKey: "\(unixSignal)"
@@ -749,7 +753,8 @@ public actor ServiceGroup: Sendable, Service {
                 case .signalCaught(let signal):
                     if self.cancellationSignals.contains(signal) {
                         // We got signalled cancellation after graceful shutdown
-                        self.logger.debug(
+                        self.logger.log(
+                            level: self.loggingConfiguration.eventLevels.onSignal,
                             "Signal caught. Cancelling the group.",
                             metadata: [
                                 self.loggingConfiguration.keys.signalKey: "\(signal)"
@@ -765,7 +770,8 @@ public actor ServiceGroup: Sendable, Service {
                 case .gracefulShutdownTimedOut:
                     // Gracefully shutting down took longer than the user configured
                     // so we have to escalate it now.
-                    self.logger.debug(
+                    self.logger.log(
+                        level: self.loggingConfiguration.eventLevels.onDurationExpiration,
                         "Graceful shutdown took longer than allowed by the configuration. Cancelling the group now.",
                         metadata: [
                             self.loggingConfiguration.keys.serviceKey: "\(service.service)"
@@ -842,7 +848,8 @@ public actor ServiceGroup: Sendable, Service {
                             attosecondsComponent: maximumCancellationDuration.attosecondsComponent
                         )
                     )
-                    self.logger.debug(
+                    self.logger.log(
+                        level: self.loggingConfiguration.eventLevels.onDurationExpiration,
                         "Cancellation took longer than allowed by the configuration."
                     )
                     fatalError("Cancellation took longer than allowed by the configuration.")

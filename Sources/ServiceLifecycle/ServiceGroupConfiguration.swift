@@ -44,9 +44,28 @@ public struct ServiceGroupConfiguration: Sendable {
         /// The keys used for logging.
         public var keys = Keys()
 
+        /// The log levels associated with significant events.
+        public struct Events: Sendable {
+            /// Log level of message indicating that the ServiceGroup has started running.
+            public var onRun = Logger.Level.debug
+            /// Log level of message indicating that the ServiceGroup will stop running as a result of an external signal.
+            public var onSignal = Logger.Level.debug
+            /// Log level of message indicating that a Service ended in an unexpected matter causing the ServiceGroup to stop running.
+            public var onServiceTermination = Logger.Level.debug
+            /// Log level of message indicating an allowed duration expired as the ServiceGroup was ending run().
+            public var onDurationExpiration = Logger.Level.debug
+
+            /// Creates default log levels for significant events.
+            public init() {}
+        }
+
+        /// The log levels associated with significant events.
+        public var eventLevels = Events()
+        
         /// Creates a new logging configuration.
         public init() {}
     }
+    
 
     /// A service configuration.
     public struct ServiceConfiguration: Sendable {
